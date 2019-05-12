@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"imup/uploader"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
