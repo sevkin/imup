@@ -86,17 +86,14 @@ func (c *controller) uploadFORM(w http.ResponseWriter, r *http.Request) {
 
 func (c *controller) uploadJSON(w http.ResponseWriter, r *http.Request) {
 	buf, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		failed(w, r, err)
-		return
+	if err == nil {
+		image := new(JSONImage)
+		err = json.Unmarshal(buf, image)
+		if err == nil {
+			src := base64.NewDecoder(base64.StdEncoding, strings.NewReader(image.Image))
+			c.store(w, r, src)
+			return
+		}
 	}
-	image := new(JSONImage)
-	err = json.Unmarshal(buf, image)
-	if err != nil {
-		failed(w, r, err)
-		return
-	}
-	src := base64.NewDecoder(base64.StdEncoding, strings.NewReader(image.Image))
-
-	c.store(w, r, src)
+	failed(w, r, err)
 }
