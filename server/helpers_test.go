@@ -25,6 +25,8 @@ func testFile(fname string) (*os.File, error) {
 	return os.Open(fname)
 }
 
+// /////////////////////////////////////////////////////////////////////////////
+
 func multipartReq(filename, fieldname string) *http.Request {
 	body, ct := multipartBody(filename, fieldname)
 	r := httptest.NewRequest("POST", "/upload/form", body)
@@ -74,6 +76,18 @@ func jsonBody(filename, fieldname string) (io.Reader, string) {
 	return pr, "application/json"
 }
 
+// /////////////////////////////////////////////////////////////////////////////
+
+func urlReq(url, key string) *http.Request {
+	r := httptest.NewRequest("GET", "/upload/url", nil)
+	q := r.URL.Query()
+	q.Add(key, url)
+	r.URL.RawQuery = q.Encode()
+	return r
+}
+
+// /////////////////////////////////////////////////////////////////////////////
+
 func base64Pipe(src io.Reader) io.Reader {
 	pr, pw := io.Pipe()
 	encoder := base64.NewEncoder(base64.StdEncoding, pw)
@@ -98,6 +112,8 @@ func TestBase64Pipe(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, []byte("SGVsbG8sIFdvcmxkIQ=="), dst)
 }
+
+// /////////////////////////////////////////////////////////////////////////////
 
 func jsonPipe(src io.Reader, fieldname string) io.Reader {
 	pr, pw := io.Pipe()
@@ -129,6 +145,8 @@ func TestJsonPipe(t *testing.T) {
 	assert.Equal(t, []byte(`{"image":"SGVsbG8sIFdvcmxkIQ=="}`), dst)
 }
 
+// /////////////////////////////////////////////////////////////////////////////
+
 func md5Reader(src io.Reader) (string, error) {
 	hash := md5.New()
 	_, err := io.Copy(hash, src)
@@ -141,3 +159,5 @@ func TestMd5Reader(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "65a8e27d8879283831b664bd8b7f0ad4", hash)
 }
+
+// /////////////////////////////////////////////////////////////////////////////

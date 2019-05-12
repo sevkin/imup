@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"imup/uploader"
@@ -12,6 +13,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/gofrs/uuid"
+	"gopkg.in/resty.v1"
 )
 
 type (
@@ -56,6 +58,7 @@ func newController(uploader uploader.Uploader) http.Handler {
 	}
 	api.Post("/upload/form", controller.uploadFORM)
 	api.Post("/upload/json", controller.uploadJSON)
+	api.Get("/upload/url", controller.uploadURL)
 	return controller
 }
 
@@ -95,6 +98,15 @@ func (c *controller) uploadJSON(w http.ResponseWriter, r *http.Request) {
 			c.store(w, r, src)
 			return
 		}
+	}
+	failed(w, r, err)
+}
+
+func (c *controller) uploadURL(w http.ResponseWriter, r *http.Request) {
+	resp, err := resty.SetHTTPMode().R().Get(r.URL.Query().Get("image"))
+	if err == nil && resp.StatusCode() == http.StatusOK && len(resp.Body()) > 0 {
+		c.store(w, r, bytes.NewReader(resp.Body()))
+		return
 	}
 	failed(w, r, err)
 }

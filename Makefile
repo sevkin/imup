@@ -22,3 +22,8 @@ form:
 json:
 	(echo -n '{"image": "'; base64 $(IMG); echo '"}') \
 	| curl -v -H "Content-Type: application/json" -d @- $(API)/upload/json
+
+serve:
+	python -m SimpleHTTPServer 5000
+url:
+	curl -v "$(API)/upload/url?image=http://localhost:5000/$(IMG)"
