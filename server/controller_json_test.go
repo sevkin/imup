@@ -59,6 +59,29 @@ func TestUploadJsonContent(t *testing.T) {
 	handler.ServeHTTP(w, r)
 }
 
+func TestUploadJsonFailedWrongKey(t *testing.T) {
+	uploader := new(mocks.Uploader)
+	handler := newController(uploader)
+
+	r := jsonReq("testdata/image.jpg", "file")
+	w := httptest.NewRecorder()
+
+	uploader.On("Store", mock.Anything).Return(uuid.Must(uuid.NewV4()), nil)
+
+	handler.ServeHTTP(w, r)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	s := Success{}
+	err := json.Unmarshal(w.Body.Bytes(), &s)
+	assert.Nil(t, err)
+	assert.Equal(t, uuid.UUID{}, s.UUID)
+
+	f := Failed{}
+	err = json.Unmarshal(w.Body.Bytes(), &f)
+	assert.Nil(t, err)
+	assert.NotEqual(t, "", f.Error)
+}
+
 func TestUploadJsonFailedUploader(t *testing.T) {
 	uploader := new(mocks.Uploader)
 	handler := newController(uploader)

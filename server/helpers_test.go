@@ -62,7 +62,7 @@ func jsonBody(filename, fieldname string) (io.Reader, string) {
 		file, _ := testFile(filename)
 		defer file.Close()
 
-		_, err := io.Copy(pw, jsonPipe(base64Pipe(file), "image"))
+		_, err := io.Copy(pw, jsonPipe(base64Pipe(file), fieldname))
 
 		if err != nil {
 			pw.CloseWithError(err)
