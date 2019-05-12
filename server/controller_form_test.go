@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"imup/mocks"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -34,6 +35,28 @@ func TestUploadFormSuccess(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &f)
 	assert.Nil(t, err)
 	assert.Equal(t, "", f.Error)
+}
+
+func TestUploadFormContent(t *testing.T) {
+	uploader := new(mocks.Uploader)
+	handler := newController(uploader)
+
+	r := multipartReq("testdata/image.jpg", "image")
+	w := httptest.NewRecorder()
+
+	uploader.On("Store", mock.Anything).Return(uuid.Must(uuid.NewV4()), nil).
+		Run(func(args mock.Arguments) {
+			src := args.Get(0).(io.Reader)
+			actual, _ := md5Reader(src)
+
+			file, _ := testFile("testdata/image.jpg")
+			defer file.Close()
+			expected, _ := md5Reader(file)
+
+			assert.Equal(t, actual, expected)
+		})
+
+	handler.ServeHTTP(w, r)
 }
 
 func TestUploadFormFailedHeader(t *testing.T) {
