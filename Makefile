@@ -18,3 +18,7 @@ run:
 
 form:
 	curl -v -F "image=@$(IMG)" $(API)/upload/form
+
+json:
+	(echo -n '{"image": "'; base64 $(IMG); echo '"}') \
+	| curl -v -H "Content-Type: application/json" -d @- $(API)/upload/json

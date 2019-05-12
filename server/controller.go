@@ -1,8 +1,12 @@
 package server
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"imup/uploader"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -23,6 +27,11 @@ type (
 	// Failed response returns json with explained error
 	Failed struct {
 		Error string `json:"error"` // explained error
+	}
+
+	// JSONImage {"image":"<base64encoded==>"}
+	JSONImage struct {
+		Image string `json:"image"` // base64 encoded content
 	}
 )
 
@@ -45,6 +54,7 @@ func newController(uploader uploader.Uploader) http.Handler {
 		uploader: uploader,
 	}
 	api.Post("/upload/form", controller.uploadFORM)
+	api.Post("/upload/json", controller.uploadJSON)
 	return controller
 }
 
@@ -61,6 +71,28 @@ func (c *controller) uploadFORM(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer src.Close()
+
+	uuid, err := c.uploader.Store(src)
+	if err != nil {
+		failed(w, r, err)
+		return
+	}
+	success(w, r, uuid)
+}
+
+func (c *controller) uploadJSON(w http.ResponseWriter, r *http.Request) {
+	buf, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		failed(w, r, err)
+		return
+	}
+	image := new(JSONImage)
+	err = json.Unmarshal(buf, image)
+	if err != nil {
+		failed(w, r, err)
+		return
+	}
+	src := base64.NewDecoder(base64.StdEncoding, strings.NewReader(image.Image))
 
 	uuid, err := c.uploader.Store(src)
 	if err != nil {
