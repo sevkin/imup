@@ -1,8 +1,7 @@
 package server
 
 import (
-	"errors"
-	"log"
+	"imup/uploader"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -13,6 +12,7 @@ import (
 type (
 	controller struct {
 		chi.Router
+		uploader uploader.Uploader
 	}
 
 	// Success response returns json with uploaded image uuid
@@ -38,18 +38,34 @@ func failed(w http.ResponseWriter, r *http.Request, err error) {
 	render.JSON(w, r, &Failed{Message: err.Error()})
 }
 
-func newController() http.Handler {
+func newController(uploader uploader.Uploader) http.Handler {
 	api := chi.NewMux()
 	controller := &controller{
-		Router: api,
+		Router:   api,
+		uploader: uploader,
 	}
 	api.Post("/upload/form", controller.uploadFORM)
 	return controller
 }
 
 func (c *controller) uploadFORM(w http.ResponseWriter, r *http.Request) {
-	log.Printf("uploadFORM not implemented")
+	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files
+	// TODO customizable set maxupload
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		failed(w, r, err)
+		return
+	}
+	src, _, err := r.FormFile("image")
+	if err != nil {
+		failed(w, r, err)
+		return
+	}
+	defer src.Close()
 
-	// success(w, r, uuid.Must(uuid.NewV4()))
-	failed(w, r, errors.New("not implemented"))
+	uuid, err := c.uploader.Store(src)
+	if err != nil {
+		failed(w, r, err)
+		return
+	}
+	success(w, r, uuid)
 }

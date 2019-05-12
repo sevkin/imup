@@ -1,6 +1,7 @@
 package server
 
 import (
+	"imup/uploader"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -13,6 +14,6 @@ func New(listen string) *http.Server {
 		Addr:    listen,
 		Handler: mux,
 	}
-	mux.Mount("/api/v1", newController())
+	mux.Mount("/api/v1", newController(uploader.NewDirUploader()))
 	return server
 }

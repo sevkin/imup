@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"imup/uploader"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -44,7 +45,7 @@ func multipartReq(fname string) *http.Request {
 func TestUploadForm(t *testing.T) {
 	r := multipartReq("testdata/image.jpg")
 	w := httptest.NewRecorder()
-	handler := newController()
+	handler := newController(uploader.NewDirUploader())
 
 	handler.ServeHTTP(w, r)
 	assert.Equal(t, http.StatusOK, w.Code)
