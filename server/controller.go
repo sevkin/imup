@@ -58,6 +58,15 @@ func newController(uploader uploader.Uploader) http.Handler {
 	return controller
 }
 
+func (c *controller) store(w http.ResponseWriter, r *http.Request, src io.Reader) {
+	uuid, err := c.uploader.Store(src)
+	if err != nil {
+		failed(w, r, err)
+		return
+	}
+	success(w, r, uuid)
+}
+
 func (c *controller) uploadFORM(w http.ResponseWriter, r *http.Request) {
 	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files
 	// TODO customizable set maxupload
@@ -72,12 +81,7 @@ func (c *controller) uploadFORM(w http.ResponseWriter, r *http.Request) {
 	}
 	defer src.Close()
 
-	uuid, err := c.uploader.Store(src)
-	if err != nil {
-		failed(w, r, err)
-		return
-	}
-	success(w, r, uuid)
+	c.store(w, r, src)
 }
 
 func (c *controller) uploadJSON(w http.ResponseWriter, r *http.Request) {
@@ -94,10 +98,5 @@ func (c *controller) uploadJSON(w http.ResponseWriter, r *http.Request) {
 	}
 	src := base64.NewDecoder(base64.StdEncoding, strings.NewReader(image.Image))
 
-	uuid, err := c.uploader.Store(src)
-	if err != nil {
-		failed(w, r, err)
-		return
-	}
-	success(w, r, uuid)
+	c.store(w, r, src)
 }
