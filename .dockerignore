@@ -1,0 +1,4 @@
+.vscode
+.envrc
+testdata
+go.sum

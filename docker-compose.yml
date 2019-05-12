@@ -1,0 +1,10 @@
+version: '3'
+services:
+  imup:
+    build: .
+    # volumes:
+    #   - ./build/upload:/data:rw
+    # user: "1000:1000"
+    user: "nobody:nobody"
+    ports:
+      - "3000:3000/tcp"

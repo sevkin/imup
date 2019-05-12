@@ -7,6 +7,13 @@ mock: # https://github.com/vektra/mockery
 	[ -x `which mockery` ] && \
 		mockery -all
 
+build:
+	docker-compose build
+up:
+	docker-compose up
+down:
+	docker-compose down
+
 # dev stuff below
 
 LISTEN := "localhost:3000"
