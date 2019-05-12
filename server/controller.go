@@ -22,7 +22,7 @@ type (
 
 	// Failed response returns json with explained error
 	Failed struct {
-		Message string `json:"message"` // explained error
+		Error string `json:"error"` // explained error
 	}
 )
 
@@ -32,10 +32,10 @@ func success(w http.ResponseWriter, r *http.Request, UUID uuid.UUID) {
 
 func failed(w http.ResponseWriter, r *http.Request, err error) {
 	if err == nil {
-		render.JSON(w, r, &Failed{Message: "something wrong"})
+		render.JSON(w, r, &Failed{Error: "something wrong"})
 		return
 	}
-	render.JSON(w, r, &Failed{Message: err.Error()})
+	render.JSON(w, r, &Failed{Error: err.Error()})
 }
 
 func newController(uploader uploader.Uploader) http.Handler {

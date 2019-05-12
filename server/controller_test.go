@@ -65,7 +65,7 @@ func TestUploadFormSuccess(t *testing.T) {
 	f := Failed{}
 	err = json.Unmarshal(w.Body.Bytes(), &f)
 	assert.Nil(t, err)
-	assert.Equal(t, "", f.Message)
+	assert.Equal(t, "", f.Error)
 }
 
 func TestUploadFormFailedHeader(t *testing.T) {
@@ -90,7 +90,7 @@ func TestUploadFormFailedHeader(t *testing.T) {
 	f := Failed{}
 	err = json.Unmarshal(w.Body.Bytes(), &f)
 	assert.Nil(t, err)
-	assert.NotEqual(t, "", f.Message)
+	assert.NotEqual(t, "", f.Error)
 }
 
 func TestUploadFormFailedField(t *testing.T) {
@@ -114,7 +114,7 @@ func TestUploadFormFailedField(t *testing.T) {
 	f := Failed{}
 	err = json.Unmarshal(w.Body.Bytes(), &f)
 	assert.Nil(t, err)
-	assert.NotEqual(t, "", f.Message)
+	assert.NotEqual(t, "", f.Error)
 }
 
 func TestUploadFormFailedUploader(t *testing.T) {
@@ -138,5 +138,5 @@ func TestUploadFormFailedUploader(t *testing.T) {
 	f := Failed{}
 	err = json.Unmarshal(w.Body.Bytes(), &f)
 	assert.Nil(t, err)
-	assert.Equal(t, "uploader failed", f.Message)
+	assert.Equal(t, "uploader failed", f.Error)
 }
