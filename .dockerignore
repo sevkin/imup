@@ -2,3 +2,5 @@
 .envrc
 testdata
 go.sum
+tmp
+Dockerfile

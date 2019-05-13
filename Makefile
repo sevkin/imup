@@ -14,6 +14,9 @@ up:
 down:
 	docker-compose down
 
+clean:
+	rm -rf tmp
+
 # dev stuff below
 
 LISTEN := "localhost:3000"
@@ -21,7 +24,8 @@ API := http://$(LISTEN)/api/v1
 IMG := testdata/image.jpg
 
 run:
-	go run main.go -listen $(LISTEN)
+	mkdir -p tmp
+	go run main.go -listen $(LISTEN) -storage ./tmp -thumbcmd ./thumb100.sh
 
 form:
 	curl -v -F "image=@$(IMG)" $(API)/upload/form
