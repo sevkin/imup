@@ -1,6 +1,7 @@
 package uploader
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -15,6 +16,7 @@ type (
 	UploaderTestSuite struct {
 		suite.Suite
 		Storage  string
+		Ctx      context.Context
 		Uploader Uploader
 	}
 )
@@ -22,6 +24,7 @@ type (
 func (suite *UploaderTestSuite) SetupSuite() {
 	suite.Storage = filepath.Join(testDir(), "tmp")
 	os.Mkdir(suite.Storage, 0755)
+	suite.Ctx = context.TODO()
 }
 
 func (suite *UploaderTestSuite) SetupTest() {
@@ -39,7 +42,7 @@ func (suite *UploaderTestSuite) TearDownSuite() {
 func (suite *UploaderTestSuite) TestStore() {
 	file, _ := testFile("testdata/image.jpg")
 	defer file.Close()
-	UUID, err := suite.Uploader.Store(file)
+	UUID, err := suite.Uploader.Store(suite.Ctx, file)
 	suite.Nil(err)
 	suite.NotEqual(uuid.UUID{}, UUID)
 }
@@ -47,7 +50,7 @@ func (suite *UploaderTestSuite) TestStore() {
 func (suite *UploaderTestSuite) TestPNG() {
 	file, _ := testFile("testdata/image.png")
 	defer file.Close()
-	UUID, err := suite.Uploader.Store(file)
+	UUID, err := suite.Uploader.Store(suite.Ctx, file)
 	suite.Nil(err)
 	suite.NotEqual(uuid.UUID{}, UUID)
 }
@@ -55,7 +58,7 @@ func (suite *UploaderTestSuite) TestPNG() {
 func (suite *UploaderTestSuite) TestGIF() {
 	file, _ := testFile("testdata/image.gif")
 	defer file.Close()
-	UUID, err := suite.Uploader.Store(file)
+	UUID, err := suite.Uploader.Store(suite.Ctx, file)
 	suite.Nil(err)
 	suite.NotEqual(uuid.UUID{}, UUID)
 }
@@ -63,12 +66,12 @@ func (suite *UploaderTestSuite) TestGIF() {
 func (suite *UploaderTestSuite) TestUnsupported() {
 	file, _ := testFile("testdata/image.zip")
 	defer file.Close()
-	_, err := suite.Uploader.Store(file)
+	_, err := suite.Uploader.Store(suite.Ctx, file)
 	suite.NotNil(err)
 }
 
 func (suite *UploaderTestSuite) TestNil() {
-	_, err := suite.Uploader.Store(nil)
+	_, err := suite.Uploader.Store(suite.Ctx, nil)
 	suite.NotNil(err)
 }
 
@@ -85,7 +88,7 @@ func TestThumbFailed(t *testing.T) {
 
 	file, _ := testFile("testdata/image.jpg")
 	defer file.Close()
-	_, err := uploader.Store(file)
+	_, err := uploader.Store(context.TODO(), file)
 	assert.NotNil(t, err)
 }
 

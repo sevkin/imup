@@ -2,6 +2,7 @@
 
 package mocks
 
+import context "context"
 import io "io"
 import mock "github.com/stretchr/testify/mock"
 
@@ -12,13 +13,13 @@ type Uploader struct {
 	mock.Mock
 }
 
-// Store provides a mock function with given fields: src
-func (_m *Uploader) Store(src io.Reader) (uuid.UUID, error) {
-	ret := _m.Called(src)
+// Store provides a mock function with given fields: ctx, src
+func (_m *Uploader) Store(ctx context.Context, src io.Reader) (uuid.UUID, error) {
+	ret := _m.Called(ctx, src)
 
 	var r0 uuid.UUID
-	if rf, ok := ret.Get(0).(func(io.Reader) uuid.UUID); ok {
-		r0 = rf(src)
+	if rf, ok := ret.Get(0).(func(context.Context, io.Reader) uuid.UUID); ok {
+		r0 = rf(ctx, src)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(uuid.UUID)
@@ -26,8 +27,8 @@ func (_m *Uploader) Store(src io.Reader) (uuid.UUID, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(io.Reader) error); ok {
-		r1 = rf(src)
+	if rf, ok := ret.Get(1).(func(context.Context, io.Reader) error); ok {
+		r1 = rf(ctx, src)
 	} else {
 		r1 = ret.Error(1)
 	}

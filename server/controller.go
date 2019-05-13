@@ -63,7 +63,7 @@ func newController(uploader uploader.Uploader) http.Handler {
 }
 
 func (c *controller) store(w http.ResponseWriter, r *http.Request, src io.Reader) {
-	uuid, err := c.uploader.Store(src)
+	uuid, err := c.uploader.Store(r.Context(), src)
 	if err != nil {
 		failed(w, r, err)
 		return

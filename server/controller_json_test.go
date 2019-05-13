@@ -21,7 +21,7 @@ func TestUploadJsonSuccess(t *testing.T) {
 	r := jsonReq("testdata/image.jpg", "image")
 	w := httptest.NewRecorder()
 
-	uploader.On("Store", mock.Anything).Return(uuid.Must(uuid.NewV4()), nil)
+	uploader.On("Store", mock.Anything, mock.Anything).Return(uuid.Must(uuid.NewV4()), nil)
 
 	handler.ServeHTTP(w, r)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -44,9 +44,9 @@ func TestUploadJsonContent(t *testing.T) {
 	r := jsonReq("testdata/image.jpg", "image")
 	w := httptest.NewRecorder()
 
-	uploader.On("Store", mock.Anything).Return(uuid.Must(uuid.NewV4()), nil).
+	uploader.On("Store", mock.Anything, mock.Anything).Return(uuid.Must(uuid.NewV4()), nil).
 		Run(func(args mock.Arguments) {
-			src := args.Get(0).(io.Reader)
+			src := args.Get(1).(io.Reader)
 			actual, _ := md5Reader(src)
 
 			file, _ := testFile("testdata/image.jpg")
@@ -66,7 +66,7 @@ func TestUploadJsonFailedWrongKey(t *testing.T) {
 	r := jsonReq("testdata/image.jpg", "file")
 	w := httptest.NewRecorder()
 
-	uploader.On("Store", mock.Anything).Return(uuid.Must(uuid.NewV4()), nil)
+	uploader.On("Store", mock.Anything, mock.Anything).Return(uuid.Must(uuid.NewV4()), nil)
 
 	handler.ServeHTTP(w, r)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -90,7 +90,7 @@ func TestUploadJsonFailedUploader(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// something wrong inside Uploader
-	uploader.On("Store", mock.Anything).Return(uuid.UUID{}, errors.New("uploader failed"))
+	uploader.On("Store", mock.Anything, mock.Anything).Return(uuid.UUID{}, errors.New("uploader failed"))
 
 	handler.ServeHTTP(w, r)
 	assert.Equal(t, http.StatusOK, w.Code)
