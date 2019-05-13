@@ -1,0 +1,87 @@
+basePath: '{{.BasePath}}'
+definitions:
+  server.Failed:
+    properties:
+      error:
+        description: explained error
+        type: string
+    type: object
+  server.JSONImage:
+    properties:
+      image:
+        description: base64 encoded content
+        type: string
+    type: object
+  server.Success:
+    properties:
+      uuid:
+        description: uploaded image uuid
+        type: string
+    type: object
+host: '{{.Host}}'
+info:
+  contact: {}
+  description: upload image, then make thumbnail 100x100, returns image id
+  license: {}
+  title: Image Upload API
+  version: "1.0"
+paths:
+  /upload/form:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Failed'
+            type: object
+      summary: Upload a image from multipart/form-data
+  /upload/json:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: image file base64 encoded
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/server.JSONImage'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Failed'
+            type: object
+      summary: Upload a image from application/json
+  /upload/url:
+    get:
+      parameters:
+      - description: image url
+        format: url
+        in: query
+        name: image
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Failed'
+            type: object
+      summary: Upload a image from external url
+swagger: "2.0"

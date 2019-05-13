@@ -7,7 +7,11 @@ mock: # https://github.com/vektra/mockery
 	[ -x `which mockery` ] && \
 		mockery -all
 
-build:
+swag: # https://github.com/swaggo/swag
+	[ -x `which swag` ] && \
+	swag init
+
+build: # swag
 	docker-compose build
 up:
 	docker-compose up

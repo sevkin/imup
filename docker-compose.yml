@@ -7,4 +7,6 @@ services:
     # user: "1000:1000"
     user: "nobody:nobody"
     ports:
-      - "3000:3000/tcp"
+      - "3000:3003/tcp"
+    command: ["imup", "-listen", "0.0.0.0:3003", "-swagurl", "http://localhost:3000/swagger"]
+    # command: ["imup", "-listen", "0.0.0.0:3003", "-swagurl", "http://example.com/swagger"]

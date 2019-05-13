@@ -71,6 +71,13 @@ func (c *controller) store(w http.ResponseWriter, r *http.Request, src io.Reader
 	success(w, r, uuid)
 }
 
+// @Summary Upload a image from multipart/form-data
+// @Accept mpfd
+// @Param image formData file true "image file"
+// @Produce json
+// @Success 200 {object} server.Success
+// @Failure 200 {object} server.Failed
+// @Router /upload/form [post]
 func (c *controller) uploadFORM(w http.ResponseWriter, r *http.Request) {
 	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files
 	// TODO customizable set maxupload
@@ -88,6 +95,13 @@ func (c *controller) uploadFORM(w http.ResponseWriter, r *http.Request) {
 	c.store(w, r, src)
 }
 
+// @Summary Upload a image from application/json
+// @Accept json
+// @Param image body server.JSONImage true "image file base64 encoded"
+// @Produce json
+// @Success 200 {object} server.Success
+// @Failure 200 {object} server.Failed
+// @Router /upload/json [post]
 func (c *controller) uploadJSON(w http.ResponseWriter, r *http.Request) {
 	buf, err := ioutil.ReadAll(r.Body)
 	if err == nil && len(buf) > 0 {
@@ -102,6 +116,12 @@ func (c *controller) uploadJSON(w http.ResponseWriter, r *http.Request) {
 	failed(w, r, err)
 }
 
+// @Summary Upload a image from external url
+// @Param image query string true "image url" Format(url)
+// @Produce json
+// @Success 200 {object} server.Success
+// @Failure 200 {object} server.Failed
+// @Router /upload/url [get]
 func (c *controller) uploadURL(w http.ResponseWriter, r *http.Request) {
 	resp, err := resty.SetHTTPMode().R().Get(r.URL.Query().Get("image"))
 	if err == nil && resp.StatusCode() == http.StatusOK && len(resp.Body()) > 0 {
