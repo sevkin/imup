@@ -17,9 +17,10 @@ func main() {
 	listen := flag.String("listen", "localhost:3000", "HTTP server listen address and port")
 	storage, _ := filepath.Abs(".")
 	flag.StringVar(&storage, "storage", storage, "image upload folder")
+	thumbcmd := flag.String("thumbcmd", "/usr/local/bin/thumb100.sh", "thumbnailer ($1 - in, $2 - out)")
 	flag.Parse()
 
-	server := server.New(*listen, storage)
+	server := server.New(*listen, storage, *thumbcmd)
 
 	go func() {
 		sigINT := make(chan os.Signal, 2)

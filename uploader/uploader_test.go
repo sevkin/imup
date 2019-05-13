@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -24,7 +25,7 @@ func (suite *UploaderTestSuite) SetupSuite() {
 }
 
 func (suite *UploaderTestSuite) SetupTest() {
-	suite.Uploader = NewDirUploader(suite.Storage)
+	suite.Uploader = NewDirUploader(suite.Storage, "/bin/true") // windows sucks?
 }
 
 func (suite *UploaderTestSuite) TearDownTest() {
@@ -73,6 +74,19 @@ func (suite *UploaderTestSuite) TestNil() {
 
 func TestUploaderTestSuite(t *testing.T) {
 	suite.Run(t, new(UploaderTestSuite))
+}
+
+func TestThumbFailed(t *testing.T) {
+	storage := filepath.Join(testDir(), "tmp")
+	os.Mkdir(storage, 0755)
+	defer os.RemoveAll(storage)
+
+	uploader := NewDirUploader(storage, "/bin/false")
+
+	file, _ := testFile("testdata/image.jpg")
+	defer file.Close()
+	_, err := uploader.Store(file)
+	assert.NotNil(t, err)
 }
 
 // /////////////////////////////////////////////////////////////////////////////

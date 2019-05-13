@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/gofrs/uuid"
@@ -19,7 +20,8 @@ type (
 	}
 
 	dirUploader struct {
-		storage string
+		storage  string
+		thumbCMD string
 	}
 )
 
@@ -45,17 +47,24 @@ func (u *dirUploader) Store(src io.Reader) (uuid.UUID, error) {
 			return uuid.UUID{}, fmt.Errorf("unsupported content: %s", contentType)
 		}
 
-		UUID, err := uuid.NewV4()
+		var UUID uuid.UUID
+		UUID, err = uuid.NewV4()
 		if err == nil {
 			fname := filepath.Join(u.storage, UUID.String()+ext)
 
-			file, err := os.OpenFile(fname, os.O_WRONLY|os.O_CREATE, 0644)
+			var file *os.File
+			file, err = os.OpenFile(fname, os.O_WRONLY|os.O_CREATE, 0644)
 			if err == nil {
 				defer file.Close()
 				_, err = io.Copy(file, buf)
 				if err == nil {
-					// TODO make thumbnail
-					return UUID, nil
+					tname := filepath.Join(u.storage, UUID.String()+".thumb.100x100"+ext)
+
+					// TODO limit subprocesses to number of cpu cores
+					err = exec.Command(u.thumbCMD, fname, tname).Run()
+					if err == nil {
+						return UUID, nil
+					}
 				}
 			}
 		}
@@ -64,8 +73,9 @@ func (u *dirUploader) Store(src io.Reader) (uuid.UUID, error) {
 }
 
 // NewDirUploader returns new Uploader instance
-func NewDirUploader(storage string) Uploader {
+func NewDirUploader(storage, thumbCMD string) Uploader {
 	return &dirUploader{
-		storage: storage,
+		storage:  storage,
+		thumbCMD: thumbCMD,
 	}
 }
